@@ -78,9 +78,10 @@ package
 		private function onEnterFrame ( e:Event ):void
 		{
 			
-			var positions:Vector.<int> = walkableSurface.getClosestPoint ( mouseX, mouseY );
+			var positions:Vector.<int> = walkableSurface.getClosestPoint ();
 			debugPoint.x = positions[0];
 			debugPoint.y = positions[1];
+			//trace ( debugPoint.x, debugPoint.y );
 			/*
 			//I always move red//
 			//I always check if she reached grandmas house//
