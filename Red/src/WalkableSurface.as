@@ -32,11 +32,11 @@ package
 			var bmp:Bitmap = new Bitmap ( bdata );
 			bdata.draw ( this );
 			
-			var bdataSmall:BitmapData = new BitmapData ( bdata.width, bdata.height, true, 0 );
+			var bdataSmall:BitmapData = new BitmapData ( bdata.width/8, bdata.height/8, true, 0 );
 			var matrix:Matrix = new Matrix ();
 			matrix.scale ( 1 / 8, 1 / 8 );
 			
-			bdataSmall.draw ( bmp, matrix );
+			bdataSmall.draw ( bdata, matrix );
 			var bmpSmall:Bitmap = new Bitmap ( bdataSmall );
 			
 			bitmaps.push ( bdataSmall );
