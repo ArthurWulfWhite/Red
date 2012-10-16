@@ -6,6 +6,8 @@ package
 	import flash.events.MouseEvent;
 	import flash.ui.Keyboard;
 	
+	import Game;
+	
 	/**
 	 * ...
 	 * @author Arthur Wulf
@@ -14,6 +16,8 @@ package
 	{
 		private var data : Vector.<Number> = new Vector.<Number>();
 		private var fill : Boolean = false;
+		
+		private var game:Game;
 		public function LvlMaker():void 
 		{
 			if (stage) init();
@@ -24,7 +28,10 @@ package
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
-			graphics.lineStyle(16,0xcc00);
+			
+			game = new Game ();
+			addChild ( game );
+			//graphics.lineStyle(16,0xcc00);
 			stage.addEventListener(MouseEvent.CLICK, onClick);
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);
 		}

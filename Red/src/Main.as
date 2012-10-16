@@ -11,6 +11,8 @@ package
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.utils.setTimeout;
+	
+	import Game;
 
 	/**
 	 * ...
@@ -39,21 +41,9 @@ package
 		private var num : int = 0;
 		
 		//The game level//
-		private var surface : Shape = new Shape();
 		private var forest : Forest = new Forest();
-		
-		//The stars of the game//
-		private var red : Red = new Red();
-		private var carrot : Carrot = new Carrot();
-		private var bunny : Bunny = new Bunny();
-		private var wolf : Wolf = new Wolf();
-		private var grandma : Grandma = new Grandma();
-		
-		//texture
-		private var grass : Grass = new Grass();
-		
-		//used to read lvl data//
-		private var data : Array = new Array();
+				
+		private var game:Game;
 		
 		public function Main():void 
 		{
@@ -65,24 +55,35 @@ package
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
-
+			
+			stage.frameRate = 60;
+			XMLLoader.init();
+			
+			game = new Game ();
+			addChild ( game );
+			game.init ();
+			game.loadLevel ( 0 );
+			
+			/*
 			surface.cacheAsBitmap = true;
 			addChild(surface);
 			surface.filters = [new ShaderFilter(SLShader)];
 			forest.cacheAsBitmap = true;
 			addChild(forest);
 			forest.filters = [new ShaderFilter(SLShader)];
+			*/
 			//setup txt
-			txtSetup();
-			//load XML data
-			XMLLoader.init();
+			
+			//txtSetup();
+			
 			//run game
-			stage.addChild(this);
-			drawShalav(0);
-			addEventListener(Event.ENTER_FRAME, onEnterFrame)
-			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);
+			//stage.addChild(this);
+			//drawShalav(0);
+			//addEventListener(Event.ENTER_FRAME, onEnterFrame)
+			//stage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);
 		}
 		
+		/*
 		private function onKey(e: KeyboardEvent):void
 		{
 			trace(currentLevel);
@@ -91,113 +92,12 @@ package
 		
 		private function onEnterFrame(e : Event):void
 		{
-			//I always move red//
-			//I always check if she reached grandmas house//
-			if (wolf.hitTestObject(red)) gameOver("You were eaten by a wolf");
-			if (red.hitTestObject(grandma)) drawShalav(++currentLevel);
-			//red's movement//
-			red.speedMultiplier = 0.05 + 
-				Math.max(0, (stage.stageWidth / 2 - distance(red.x, red.y, mouseX, mouseY))) / (stage.stageWidth/2);
-			var angle : Number = Math.atan2(mouseY - red.y, mouseX - red.x);
-			var stepX : int = BASE_SPEED * red.speedMultiplier * Math.cos(angle);
-			var stepY : int = BASE_SPEED * red.speedMultiplier * Math.sin(angle);
-			var move : Boolean = true;
-			while (Math.abs(stepX) + Math.abs(stepY) > 0 && move && distance(red.x, red.y, mouseX, mouseY) > 2)
-			{
-				move = false;
-				if (stepX)
-				{
-					if (hitTestPoint(red.x + sign(stepX) * red.size, red.y, true))
-					{
-						red.x += sign(stepX) * Math.min(Math.abs(stepX), 1);
-						move = true;
-						stepX -= sign(stepX) * Math.min(Math.abs(stepX), 1);
-					}
-				}
-				if (stepY)
-				{
-					if (hitTestPoint(red.x, red.y  + sign(stepY) * red.size, true))
-					{
-						red.y += sign(stepY) * Math.min(Math.abs(stepY), 1);
-						move = true;
-						stepY -= sign(stepY) * Math.min(Math.abs(stepY), 1);
-					}
-				}				
-			}
-			//affected by the distance from the pointer//
-			//affected by the time she is moving
-			switch(gameState)
-			{
-				case START:
-					if (wolf.way >= 0.99) wolf.way = -0.99;
-					wolf.way += 0.004;
-					wolf.walk();
-					if (wolf.sees(red)) gameState = WOLF;
-					if (red.hitTestObject(carrot))
-					{
-						gameState = BUNNY;
-						removeChild(carrot);
-						//play ding sound
-					}
-				break;
-				
-				case WOLF:
-					if (wolf.way >= 0.99) wolf.way = -0.99;
-					wolf.way += 0.004;
-					chase(wolf, red);
-					if (wolf.hitTestObject(bunny))
-					{
-						gameState = NONE;
-						//slowly remove..
-						removeChild(bunny);
-					}
-					if (red.hitTestObject(carrot))
-					{
-						gameState = BOTH;
-						removeChild(carrot);
-						//play ding sound
-					}
-				break;
-				
-				case BUNNY:
-					//+move red
-					wolf.way += 0.004;
-					wolf.walk();
-					if (wolf.sees(red)) gameState = BOTH;
-					chase(bunny, red);
-					if (bunny.hitTestObject(red)) gameOver("You were bitten by a rabid bunny");
-					//carrot is not being checked
-				break;
-				
-				case BOTH:
-					//+move red
-					chase(wolf, red);
-					chase(bunny, red);
-					if (bunny.hitTestObject(red)) gameOver("You were bitten by a rabid bunny");
-					if (wolf.hitTestObject(bunny))
-					{
-						gameState = NONE;
-						//slowly remove..
-						removeChild(bunny);
-					}
-					//carrot not available
-				break;
-				
-				case NONE:
-					//+move red
-					//check if red is touching wolf// ?? always
-				break;
-				
-			}
+			
 		}
 		
 		private function addDmuyot():void
 		{
-			placeDmut("red");
-			placeDmut("bunny");
-			placeDmut("carrot");
-			placeDmut("grandma");
-			createWolf();
+			
 		}
 		
 		private function createWolf ():void
@@ -215,63 +115,7 @@ package
 		
 		private function placeDmut(dName : String):void
 		{
-			data = String(XMLLoader.xml.shalav[currentLevel][dName]).split(",");
-			var d : Dmut = Dmut(this[dName]);
-			if(d.parent == null)addChild(d);
-			d.x = Number(data[0]);
-			d.y = Number(data[1]);
-		}
-		
-		private function drawShalav(lvlNum : int):void
-		{
-			gameState = START;
-			this.currentLevel = lvlNum;
-			addDmuyot();
-			surface.graphics.clear();
-			surface.graphics.lineStyle(24, 0x8800);
-			surface.graphics.lineBitmapStyle(grass);
-			var i : int = 0;
-			for each(var a : XML in XMLLoader.xml.shalav[currentLevel].area)
-			{
-				surface.graphics.beginFill(0x8404);
-				surface.graphics.beginBitmapFill(grass);
-				data = String(a).split(",");
-				for (i = 0; i < data.length; i++)
-				{
-					data[i] = Number(data[i]);
-				}
-				surface.graphics.moveTo(data[0], data[1]);
-				for (i = 0; i < data.length - 2; i += 2)
-				{
-					surface.graphics.curveTo
-					(
-						data[i], data[i + 1],
-						(data[i] + data[i + 2]) / 2,
-						(data[i+1] + data[i + 3])/2
-					);
-				}
-				surface.graphics.endFill();
-			}
-			for each(var p : XML in XMLLoader.xml.shalav[currentLevel].path)
-			{
-				data = String(p).split(",");
-				for (i = 0; i < data.length; i++)
-				{
-					data[i] = Number(data[i]);
-				}
-				surface.graphics.moveTo(data[0], data[1]);
-				for (i = 0; i < data.length - 2; i += 2)
-				{
-					surface.graphics.curveTo
-					(
-						data[i], data[i + 1],
-						(data[i] + data[i + 2]) / 2,
-						(data[i+1] + data[i + 3])/2
-					);
-				}
-				surface.graphics.lineTo(data[i], data[i + 1]);
-			}
-			forest.spawnForest(surface);
+			
 		}
 		
 		private function getSpeed(dmut : Dmut):Number
@@ -336,6 +180,7 @@ package
 			if (val > 0) return 1;
 			else return -1;
 		}
+		*/
+		
 	}
-	
 }

@@ -83,7 +83,7 @@ package
 		public function sees(d : Dmut):Boolean
 		{
 			var visible : Boolean = true;
-			var res : Number = Main.distance(x, y, d.x, d.y) / 5;
+			var res : Number = 0//Main.distance(x, y, d.x, d.y) / 5;
 			for (var i : int = 0; visible == true && i < res; i++)
 			{
 				visible = parent.hitTestPoint
