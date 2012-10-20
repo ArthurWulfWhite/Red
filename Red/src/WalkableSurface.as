@@ -3,6 +3,7 @@ package
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import XMLLoader;
 	
@@ -12,7 +13,11 @@ package
 	{
 		private var grass : Grass = new Grass();
 		
+		private var debugLayer:Sprite = new Sprite ();
+		
 		private var bitmapGrids : Vector.<BitmapData> = new Vector.<BitmapData>;
+		
+		private var gridDebugColors : Array = [ 0xAAAAAA, 0xFFFFFF, 0xFF, 0xFF00, 0xFF0000, 0xFFFF, 0xFFFF00 ];
 		
 		public function WalkableSurface() 
 		{
@@ -37,9 +42,12 @@ package
 			
 			//graphics.clear ();
 			var bmp:Bitmap = new Bitmap ( bitmapGrids[3] );
-			bmp.width = bmp.height = stage.stageWidth;
-			bmp.alpha = .5;
+			var bmp2:Bitmap = new Bitmap ( bitmapGrids[4] );
+			bmp2.width = bmp2.height = bmp.width = bmp.height = stage.stageWidth;
+			bmp2.alpha = bmp.alpha = .2;
 			addChild ( bmp );
+			addChild ( bmp2 );
+			addChild ( debugLayer );
 		}
 		
 		/**
@@ -50,6 +58,7 @@ package
 		 */
 		public function getClosestPoint ():Vector.<int>
 		{	
+			debugLayer.graphics.clear ();
 			var arr:Array = new Array ();
 			
 			//The funny thing is that these two loops serve a single pixel :D
@@ -74,7 +83,7 @@ package
 		
 		private function chooseOneFromFour ( x:int, y:int, level:int ):Vector.<int>
 		{
-			if ( level == 2 ) trace ( x, y );
+			//if ( level == 2 ) trace ( x, y );
 			var realX1:Number = toGlobal ( x, level );
 			var realX2:Number = toGlobal ( x + 1, level );
 			var realY1:Number = toGlobal ( y, level );
@@ -89,6 +98,12 @@ package
 			var winner:int = findClosestInArray ( arr );
 			if ( winner % 2 ) x ++;
 			if ( winner > 1 ) y ++;
+			
+			if ( gridDebugColors[level] ) {
+				debugLayer.graphics.lineStyle ( 1, gridDebugColors[level], 1 );
+				var dim:Number = getLevelMultiplier ( level ) / 2;
+				debugLayer.graphics.drawRect ( arr[winner].x - dim, arr[winner].y - dim, dim*2, dim*2 );
+			}
 			
 			if ( level == totalLevels ) return new <int>[x, y];
 			else return chooseOneFromFour ( x*2, y*2, level + 1 ); //recurrency FTW
@@ -121,7 +136,8 @@ package
 				var bdataBuffer:BitmapData = new BitmapData ( bdata.width / 2, bdata.height / 2, false, 0 );
 				var bmp:Bitmap = new Bitmap ( bdata );
 				//bdataBuffer.draw ( bdata, matrix ); //bad!
-				bdataBuffer.draw ( bmp, matrix );
+				
+				bdataBuffer.draw ( bmp, matrix, new ColorTransform (5, 5, 5) );
 				bdata = bdataBuffer;
 				bitmapGrids.unshift ( bdata );
 				
