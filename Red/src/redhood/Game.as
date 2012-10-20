@@ -1,8 +1,10 @@
-package  
+package redhood
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	
+	import redhood.surface.WalkableSurface;
 	
 	public class Game extends Sprite 
 	{
@@ -27,6 +29,9 @@ package
 		private var grandma : Grandma = new Grandma();
 		
 		private var debugPoint:Sprite = new Sprite ();
+		
+		private var lastMouseX:int = -1;
+		private var lastMouseY:int = -1;
 		
 		public function Game() 
 		{

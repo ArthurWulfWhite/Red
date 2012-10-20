@@ -1,4 +1,4 @@
-package 
+package redhood
 {
 	import flash.display.BitmapData;
 	import flash.display.Shader;
@@ -12,7 +12,7 @@ package
 	import flash.text.TextFormat;
 	import flash.utils.setTimeout;
 	
-	import Game;
+	import redhood.Game;
 
 	/**
 	 * ...
@@ -20,7 +20,7 @@ package
 	 */
 	public class Main extends Sprite 
 	{
-		[Embed(source = 'Scanlines.pbj', mimeType = 'application/octet-stream')]
+		[Embed(source = '../Scanlines.pbj', mimeType = 'application/octet-stream')]
 		private var Scanlines : Class;
 		private var SLShader : Shader = new Shader(new Scanlines());
 		//states//

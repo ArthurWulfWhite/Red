@@ -1,4 +1,4 @@
-package  
+package redhood.surface
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -9,17 +9,18 @@ package
 	
 	import flash.utils.getTimer;
 	
-	public class WalkableSurface extends Sprite 
+	public class WalkableSurfaceOld extends Sprite 
 	{
 		private var grass : Grass = new Grass();
+		public var debug:Boolean = false;
 		
 		private var debugLayer:Sprite = new Sprite ();
 		
 		private var bitmapGrids : Vector.<BitmapData> = new Vector.<BitmapData>;
 		
-		private var gridDebugColors : Array = [ 0xAAAAAA, 0xFFFFFF, 0xFF, 0xFF00, 0xFF0000, 0xFFFF, 0xFFFF00 ];
+		private var gridDebugColors : Array = [ 0xAAAAAA, 0xFFFFFF, 0xFF, 0xFF00, 0xFF0000, 0xFFFF, 0xFFFF00, 0x010101, 0xFFFFFF ];
 		
-		public function WalkableSurface() 
+		public function WalkableSurfaceOld() 
 		{
 			
 		}
@@ -50,12 +51,17 @@ package
 			addChild ( debugLayer );
 		}
 		
-		/**
-		 * Find the closest point to given coordinates
-		 * @param	x typically Mouse X
-		 * @param	y typically Mouse Y
-		 * @return	x and y in an <int> vector
-		 */
+		private function drawDebugCell ( x:int, y:int, level:int ):void
+		{
+			x = toGlobal ( x, level );
+			y = toGlobal ( y, level );
+			if ( gridDebugColors[level] ) {
+				debugLayer.graphics.lineStyle ( 1, gridDebugColors[level], 1 );
+				var dim:Number = getLevelMultiplier ( level ) / 2;
+				debugLayer.graphics.drawRect ( x - dim, y - dim, dim*2, dim*2 );
+			}
+		}
+		
 		public function getClosestPoint ():Vector.<int>
 		{	
 			debugLayer.graphics.clear ();
@@ -76,7 +82,7 @@ package
 		}
 		
 		private function get totalLevels ():int { return bitmapGrids.length - 1 }
-		private function getLevelMultiplier ( level:int ):int { return Math.pow ( 2, totalLevels - level ) }
+		private function getLevelMultiplier ( level:int ):int { return bitmapGrids[0].width * Math.pow ( 2, totalLevels - level ) }
 		private function toGlobal ( v:int, level:int ):Number { return ( v + .5 ) * getLevelMultiplier ( level ) }
 		
 		private var debug:Boolean = false;
