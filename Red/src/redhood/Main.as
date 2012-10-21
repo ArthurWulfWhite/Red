@@ -12,6 +12,8 @@ package redhood
 	import flash.text.TextFormat;
 	import flash.utils.setTimeout;
 	
+	import flash.display.StageQuality;
+	
 	import redhood.Game;
 
 	/**
@@ -57,6 +59,7 @@ package redhood
 			// entry point
 			
 			stage.frameRate = 60;
+			stage.quality = StageQuality.BEST;
 			XMLLoader.init();
 			
 			game = new Game ();

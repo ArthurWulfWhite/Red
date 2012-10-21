@@ -30,8 +30,8 @@ package redhood
 		
 		private var debugPoint:Sprite = new Sprite ();
 		
-		private var lastMouseX:int = -1;
-		private var lastMouseY:int = -1;
+		private var prevMouseX:int = -1;
+		private var prevMouseY:int = -1;
 		
 		public function Game() 
 		{
@@ -82,10 +82,14 @@ package redhood
 		
 		private function onEnterFrame ( e:Event ):void
 		{
-			
+			if ( mouseX == prevMouseX && mouseY == prevMouseY ) return;
+			prevMouseX = mouseX;
+			prevMouseY = mouseY;
 			var positions:Vector.<int> = walkableSurface.getClosestPoint ();
-			debugPoint.x = positions[0];
-			debugPoint.y = positions[1];
+			if ( positions[2] < 1000 ) {
+				debugPoint.x = positions[0];
+				debugPoint.y = positions[1];
+			}
 			//trace ( debugPoint.x, debugPoint.y );
 			/*
 			//I always move red//

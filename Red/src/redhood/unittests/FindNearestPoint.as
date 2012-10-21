@@ -30,7 +30,7 @@ package redhood.unittests
 		public function init ():void
 		{
 			walkableSurface = new WalkableSurface ();
-			walkableSurface.debug = true;
+			//walkableSurface.debug = true;
 			
 			debugPoint.graphics.beginFill ( 0xFF0000 );
 			debugPoint.graphics.drawCircle ( 0, 0, 2 );
