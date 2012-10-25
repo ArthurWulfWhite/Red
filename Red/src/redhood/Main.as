@@ -84,6 +84,7 @@ package redhood
 			//drawShalav(0);
 			//addEventListener(Event.ENTER_FRAME, onEnterFrame)
 			//stage.addEventListener(KeyboardEvent.KEY_DOWN, onKey);
+			addChild ( new DebugSmoothness() );
 		}
 		
 		/*

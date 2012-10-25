@@ -4,19 +4,23 @@ package redhood.surface
 	import XMLLoader;
 	
 	import redhood.surface.TerrainSnapper;
+	import redhood.surface.PathFinder;
 	
 	public class WalkableSurface extends Sprite
 	{
+		private var terrainSnapper:TerrainSnapper;
+		private var pathFinder:PathFinder;
+		
 		private var grass : Grass = new Grass();
 		
-		private var debugLayer:Sprite;
-		private var terrainSnapper:TerrainSnapper;
+		private var debugLayer:Sprite;		
 		private var cache:Object;
 		
 		public function WalkableSurface( debug:Boolean = false ) 
 		{
 			if ( debug ) debugLayer = new Sprite ();
 			terrainSnapper = new TerrainSnapper ( debugLayer );
+			pathFinder = new PathFinder ( debugLayer );
 		}
 		
 		public function draw ( lvlNum:int ):void
@@ -30,7 +34,17 @@ package redhood.surface
 			
 			if ( debugLayer ) addChild ( debugLayer );
 			terrainSnapper.init ( this );
+			pathFinder.init ( this );
+			if ( debugLayer ) {
+				terrainSnapper.drawDebug ();
+				pathFinder.drawDebug ();
+			}
 			cache = { };
+		}
+		
+		public function makePath ( x:int, y:int, x2:int, y2:int ):void
+		{
+			pathFinder.makePath ( x, y, x2, y2 );
 		}
 		
 		/**

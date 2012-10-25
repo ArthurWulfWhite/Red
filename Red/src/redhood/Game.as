@@ -32,6 +32,8 @@ package redhood
 		
 		private var prevMouseX:int = -1;
 		private var prevMouseY:int = -1;
+		private var prevDestX:int = -1;
+		private var prevDestY:int = -1;
 		
 		public function Game() 
 		{
@@ -41,7 +43,7 @@ package redhood
 		
 		public function init ():void
 		{
-			walkableSurface = new WalkableSurface ();
+			walkableSurface = new WalkableSurface ( true );
 			
 			debugPoint.graphics.beginFill ( 0xFF0000 );
 			debugPoint.graphics.drawCircle ( 0, 0, 2 );
@@ -55,16 +57,17 @@ package redhood
 			
 			addChild ( surface );
 			addChild ( walkableSurface );
-			addChild ( grandma );
-			addChild ( carrot );
+			//addChild ( grandma );
+			//addChild ( carrot );
 			addChild ( red );
-			addChild ( bunny );
-			addChild ( wolf );
+			//addChild ( bunny );
+			//addChild ( wolf );
 			addChild ( overlay );
 			addChild ( debugPoint );
 			
 			stage.addEventListener ( KeyboardEvent.KEY_DOWN, onKeyDown );
 			stage.addEventListener ( Event.ENTER_FRAME, onEnterFrame );
+			red.alpha = .4;
 		}
 		
 		public function loadLevel ( lvlNum:int ):void
@@ -89,7 +92,13 @@ package redhood
 			if ( positions[2] < 1000 ) {
 				debugPoint.x = positions[0];
 				debugPoint.y = positions[1];
+				if ( prevDestX != debugPoint.x || prevDestY != debugPoint.y ) {
+					walkableSurface.makePath ( red.x, red.y, positions[0], positions[1] );
+					prevDestX = debugPoint.x;
+					prevDestY = debugPoint.y;
+				}
 			}
+			
 			//trace ( debugPoint.x, debugPoint.y );
 			/*
 			//I always move red//

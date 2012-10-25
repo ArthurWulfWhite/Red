@@ -9,6 +9,7 @@ package redhood.surface
 	import flash.geom.Matrix;
 	/**
 	 * Terrain Snapper class finds a terrain pixel being the closest to given coordinates.
+	 * This class is designed to work with project dimensions set to 512x512. Some changes probably need to be done for other dimensions.
 	 * @author Markus Smoliński
 	 */
 	public class TerrainSnapper 
@@ -42,7 +43,7 @@ package redhood.surface
 		 */
 		public function TerrainSnapper ( debugLayer:Sprite = null ) 
 		{
-			this.debugLayer = debugLayer;
+			//this.debugLayer = debugLayer;
 		}
 		
 		/**
@@ -63,17 +64,19 @@ package redhood.surface
 			for ( i = 0; i < bitmapGrids.length; i++ ) {
 				levelMultiplier[i] = bitmapGrids[0].width * Math.pow ( 2, lastLevel - i );
 			}
-			
-			if ( debugLayer ) {
-				for ( i = 0; i < bitmapGrids.length; i++ ) {
-					var bmp:Bitmap = new Bitmap ( bitmapGrids[i] );
-					bmp.width = debugLayer.stage.stageWidth;
-					bmp.height = debugLayer.stage.stageHeight;
-					bmp.alpha = .1;
-					debugLayer.addChild ( bmp );
-				}
-				showGrids ( true );
+		}
+		
+		public function drawDebug ():void
+		{
+			if ( !debugLayer ) return;
+			for ( var i:int = 0; i < bitmapGrids.length; i++ ) {
+				var bmp:Bitmap = new Bitmap ( bitmapGrids[i] );
+				bmp.width = debugLayer.stage.stageWidth;
+				bmp.height = debugLayer.stage.stageHeight;
+				bmp.alpha = .1;
+				debugLayer.addChild ( bmp );
 			}
+			showGrids ( true );
 		}
 		
 		/**
