@@ -10,9 +10,10 @@ package redhood
 		
 		public function DebugSmoothness() 
 		{
-			tester.x = tester.y = 30;
+			tester.x = 200;
+			tester.y = 30;
 			
-			tester.graphics.beginFill ( 0xFFFFFF );
+			tester.graphics.beginFill ( 0xcccccc );
 			tester.graphics.moveTo ( -5, -10 );
 			tester.graphics.lineTo ( 5, -10 );
 			tester.graphics.lineTo ( -5, 10 );

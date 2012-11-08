@@ -12,6 +12,8 @@ package redhood
 	import flash.text.TextFormat;
 	import flash.utils.setTimeout;
 	
+	import flash.utils.getTimer;
+	
 	import flash.display.StageQuality;
 	
 	import redhood.Game;

@@ -14,6 +14,40 @@ package redhood.surface
 	 */
 	public class TerrainSnapper 
 	{
+		/**
+		 * Initialize anywhere.
+		 * @param	debugLayer set it if you want to draw squares for debugging
+		 */
+		public function TerrainSnapper ( debugLayer:Sprite = null ) 
+		{ _constructor ( debugLayer ) }
+		
+		/**
+		 * Prepares bitmapGrids
+		 * @param	terrain a raster or vector object to draw on bitmapGrids
+		 */
+		public function init ( terrain:DisplayObject ):void
+		{ _init ( terrain ) }
+		
+		public function drawDebug ():void
+		{ _drawDebug () }
+		
+		/**
+		 * Find the closest point on terrain to given coordinates (e.g. mouse cursor)
+		 * @param	x typically mouseX
+		 * @param	y typically mouseY
+		 */
+		public function getClosestPoint ( x:int, y:int ):Vector.<int>
+		{ return _getClosestPoint ( x, y ) }
+		
+		public function get x ():int { return getClosest ( 0 ) }
+		public function get y ():int { return getClosest ( 1 ) }
+		public function get distance ():int { return getClosest ( 2 ) }
+		
+		
+		/***********************************************
+		 *   IMPLEMENTATION
+		 ***********************************************/
+		
 		private var debugLayer:Sprite;
 		private var strengthenColor:ColorTransform = new ColorTransform ( 100, 100, 100 );
 		
@@ -32,26 +66,26 @@ package redhood.surface
 		private var childY:Vector.<int> = new Vector.<int>(200, true);
 		private var childMin:Vector.<int> = new Vector.<int>(200, true);
 		
+		private var cache:Object;
+		
 		private var mouseX:int;
 		private var mouseY:int;
 		private var parentLen:int;
 		private var childLen:int;
 		
-		/**
-		 * Initialize anywhere.
-		 * @param	debugLayer set it if you want to draw squares for debugging
-		 */
-		public function TerrainSnapper ( debugLayer:Sprite = null ) 
+		private function get lastLevel ():int { return bitmapGrids.length - 1 }
+		private function getLevelMultiplier ( level:int ):int
+		{ return bitmapGrids[0].width * Math.pow ( 2, lastLevel - level ) }
+		private function toGlobal ( v:int, level:int ):Number { return ( v + .5 ) * getLevelMultiplier ( level ) }
+		
+		private function _constructor ( debugLayer:Sprite = null ):void
 		{
 			//this.debugLayer = debugLayer;
 		}
 		
-		/**
-		 * Prepares bitmapGrids
-		 * @param	terrain a raster or vector object to draw on bitmapGrids
-		 */
-		public function init ( terrain:DisplayObject ):void
+		private function _init ( terrain:DisplayObject ):void
 		{
+			cache = { };
 			var i:int;
 			var bdata:BitmapData = new BitmapData ( terrain.stage.stageWidth, terrain.stage.stageHeight, false, 0 );
 			bdata.draw ( terrain, null, strengthenColor );
@@ -66,7 +100,7 @@ package redhood.surface
 			}
 		}
 		
-		public function drawDebug ():void
+		private function _drawDebug ():void
 		{
 			if ( !debugLayer ) return;
 			for ( var i:int = 0; i < bitmapGrids.length; i++ ) {
@@ -79,17 +113,30 @@ package redhood.surface
 			showGrids ( true );
 		}
 		
-		/**
-		 * Find the closest point on terrain to given coordinates (e.g. mouse cursor)
-		 * @param	x typically mouseX
-		 * @param	y typically mouseY
-		 */
-		public function getClosestPoint ( pointX:int, pointY:int ):Vector.<int>
+		private function getCache ( x:int, y:int ):Vector.<int>
 		{
+			if ( !cache[x] ) cache[x] = { };
+			return cache[x][y];
+		}
+		
+		private function getClosest ( index:int ):int
+		{
+			var p:Vector.<int> = getCache ( mouseX, mouseY );
+			if ( p ) return cache[mouseX][mouseY][index];
+			else return -1;
+		}
+		
+		private function _getClosestPoint ( pointX:int, pointY:int ):Vector.<int>
+		{
+			if ( getCache(pointX, pointY) ) return cache[mouseX][mouseY];
 			mouseX = pointX;
 			mouseY = pointY;
+			
 			if ( debugLayer ) debugLayer.graphics.clear ();
-			if ( bitmapGrids[lastLevel].getPixel(mouseX, mouseY) ) return new <int>[mouseX, mouseY, 0];
+			if ( bitmapGrids[lastLevel].getPixel(mouseX, mouseY) ) {
+				cache[mouseX][mouseY] = new <int>[mouseX, mouseY, 0];
+				return cache[mouseX][mouseY];
+			}
 			
 			var x:int, y:int, i:int, smallestMax:int;
 			
@@ -140,17 +187,9 @@ package redhood.surface
 					closest = i;
 				}
 			}
-			return new <int>[parentX[closest], parentY[closest], distance];
+			cache[mouseX][mouseY] = new <int>[parentX[closest], parentY[closest], distance];
+			return cache[mouseX][mouseY];
 		}
-		
-		/*******************
-		 * Private methods
-		 *******************/
-		
-		private function get lastLevel ():int { return bitmapGrids.length - 1 }
-		private function getLevelMultiplier ( level:int ):int { 
-			return bitmapGrids[0].width * Math.pow ( 2, lastLevel - level ) }
-		private function toGlobal ( v:int, level:int ):Number { return ( v + .5 ) * getLevelMultiplier ( level ) }
 		
 		private function createGrids ( bdata:BitmapData ):void
 		{

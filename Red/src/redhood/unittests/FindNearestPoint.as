@@ -29,8 +29,7 @@ package redhood.unittests
 		
 		public function init ():void
 		{
-			walkableSurface = new WalkableSurface ();
-			//walkableSurface.debug = true;
+			walkableSurface = new WalkableSurface ( true );
 			
 			debugPoint.graphics.beginFill ( 0xFF0000 );
 			debugPoint.graphics.drawCircle ( 0, 0, 2 );
@@ -51,7 +50,7 @@ package redhood.unittests
 			if ( mouseX == prevMouseX && mouseY == prevMouseY ) return;
 			prevMouseX = mouseX;
 			prevMouseY = mouseY;
-			var positions:Vector.<int> = walkableSurface.getClosestPoint ();
+			var positions:Vector.<int> = walkableSurface.terrainSnapper.getClosestPoint ( mouseX, mouseY );
 			debugPoint.x = positions[0];
 			debugPoint.y = positions[1];
 		}

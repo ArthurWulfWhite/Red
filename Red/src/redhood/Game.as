@@ -88,12 +88,13 @@ package redhood
 			if ( mouseX == prevMouseX && mouseY == prevMouseY ) return;
 			prevMouseX = mouseX;
 			prevMouseY = mouseY;
-			var positions:Vector.<int> = walkableSurface.getClosestPoint ();
-			if ( positions[2] < 1000 ) {
-				debugPoint.x = positions[0];
-				debugPoint.y = positions[1];
+			
+			walkableSurface.terrainSnapper.getClosestPoint ( mouseX, mouseY );
+			if ( walkableSurface.terrainSnapper.distance < 1000 ) {
+				debugPoint.x = walkableSurface.terrainSnapper.x;
+				debugPoint.y = walkableSurface.terrainSnapper.y;
 				if ( prevDestX != debugPoint.x || prevDestY != debugPoint.y ) {
-					walkableSurface.makePath ( red.x, red.y, positions[0], positions[1] );
+					walkableSurface.debug ( walkableSurface.pathFinder.makePath ( red.x, red.y, debugPoint.x, debugPoint.y ) );
 					prevDestX = debugPoint.x;
 					prevDestY = debugPoint.y;
 				}

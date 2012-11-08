@@ -1,37 +1,76 @@
 package redhood.surface
 {
+	import flash.display.Bitmap;
 	import flash.display.Sprite;
+	import flash.text.TextField;
 	import XMLLoader;
 	
 	import redhood.surface.TerrainSnapper;
 	import redhood.surface.PathFinder;
 	
+	import flash.utils.getTimer;
+	
 	public class WalkableSurface extends Sprite
 	{
-		private var terrainSnapper:TerrainSnapper;
-		private var pathFinder:PathFinder;
+		public var terrainSnapper : TerrainSnapper;
+		public var pathFinder : PathFinder;
+		
+		/**
+		 * Initialize anywhere.
+		 * @param	debugLayer set it if you want to draw squares for debugging
+		 */
+		public function WalkableSurface( debug:Boolean = false ) 
+		{ _constructor ( debug ) }
+		
+		public function draw ( lvlNum:int ):void
+		{ _draw ( lvlNum ) }
+		
+		/***********************************************
+		 *   IMPLEMENTATION
+		 ***********************************************/		
+		
+		public function debug ( v:int ):void
+		{
+			tf.text = v.toString();
+		}
+		
+		[Embed(source = "../unittests/maze.png")]
+		private var Maze:Class;
+		private var bmp:Bitmap = new Maze ();
 		
 		private var grass : Grass = new Grass();
 		
 		private var debugLayer:Sprite;		
-		private var cache:Object;
+		private var tf:TextField = new TextField ();
 		
-		public function WalkableSurface( debug:Boolean = false ) 
+		private function _constructor ( debug:Boolean = false ):void
 		{
 			if ( debug ) debugLayer = new Sprite ();
 			terrainSnapper = new TerrainSnapper ( debugLayer );
 			pathFinder = new PathFinder ( debugLayer );
+			tf.x = 300;
+			tf.text = "abc";
+			tf.y = 10;
+			tf.background = true;
+			tf.height = 20;
+			
+		  //remove Bitmap class
+			bmp.width = bmp.height = 512;
+			
 		}
 		
-		public function draw ( lvlNum:int ):void
+		private function _draw ( lvlNum:int ):void
 		{
 			while ( numChildren ) removeChildAt ( 0 );
 			graphics.clear();
 			graphics.lineStyle(24, 0x8800);
 			graphics.lineBitmapStyle(grass);
+			/*
 			drawAreas ( lvlNum );
 			drawPaths ( lvlNum );
-			
+			/*/
+			addChild ( bmp );
+			//*/
 			if ( debugLayer ) addChild ( debugLayer );
 			terrainSnapper.init ( this );
 			pathFinder.init ( this );
@@ -39,17 +78,14 @@ package redhood.surface
 				terrainSnapper.drawDebug ();
 				pathFinder.drawDebug ();
 			}
-			cache = { };
-		}
-		
-		public function makePath ( x:int, y:int, x2:int, y2:int ):void
-		{
-			pathFinder.makePath ( x, y, x2, y2 );
+			//
+			addChild (tf);
+			
 		}
 		
 		/**
 		 * Find the closest point to mouse position
-		 */
+		 
 		public function getClosestPoint ():Vector.<int>
 		{
 			if ( !cache[mouseX] ) cache[mouseX] = { };
@@ -61,7 +97,7 @@ package redhood.surface
 			if ( vector[2] ) cache[mouseX][mouseY] = { x: vector[0], y: vector[1] };
 			return vector;
 		}
-		
+		*/
 		private function drawAreas ( lvlNum:int ):void
 		{
 			var i:int;

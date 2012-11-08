@@ -71,12 +71,12 @@ package redhood.surface
 			bmp.width = debugLayer.stage.stageWidth;
 			bmp.height = debugLayer.stage.stageHeight;
 			bmp.alpha = .2;
-			//debugLayer.addChild ( bmp );
+			debugLayer.addChild ( bmp );
 			//*/
 			
 			var smallbmp:Bitmap = new Bitmap ( lowRes );
 			smallbmp.width = smallbmp.height = 64;
-			//debugLayer.addChild ( smallbmp );
+			debugLayer.addChild ( smallbmp );
 		}
 		
 		private var destX:int;
@@ -111,7 +111,7 @@ package redhood.surface
 				//makePath2 ( 121, 232, 309, 67 );
 				makePath2 ( x2, y2, x, y );
 			}
-			//trace ( numPoints);
+			trace ( numPoints);
 			return getTimer () - t;
 			//*/
 		}
@@ -145,15 +145,16 @@ package redhood.surface
 			
 			var rightBorder:int = lowRes.width - 1;
 			var botBorder:int = lowRes.height - 1;
-			
-			//do {
-				//var changed:Boolean = false;
+			var end:int = getTimer() + 1000;
+			trace ( 'start!' );
+			do {
+				var changed:Boolean = false;
 				for ( i = 0; i < numPoints; i++ ) {
 					if ( pointsDone[i] ) continue;
 					pointsDone[i] = true;
 					if ( minTime(destX, destY, pointsX[i], pointsY[i]) + pointsT[i] > maxTime ) continue;
 					
-					//changed = true;
+					changed = true;
 					var left:int = Math.max ( 0, pointsX[i] - 1 );
 					var right:int = Math.min ( rightBorder, pointsX[i] + 1 );
 					var top:int = Math.max ( 0, pointsY[i] - 1 );
@@ -164,20 +165,18 @@ package redhood.surface
 						}
 					}	
 					var t:int = getTimer ();
-					//if ( t > end ) break;
+					if ( t > end ) break;
 				}
-				//if ( t > end ) break;
-			//} while ( changed );
+				if ( t > end ) break;
+			} while ( changed );
 			
 			
 			//go back
+			var time:Number = 1000000000;
 			x2 = destX;
 			y2 = destY;
-			var end:int = getTimer() + 1000;
-			var prevTime:Number = 0;
-			var time:Number = Number.MAX_VALUE;
-			while ( prevTime != time ) {
-				prevTime = time;
+			trace ( 'finish!' );
+			while ( time > 0 ) {
 				left = Math.max ( 0, x2 - 1 );
 				right = Math.min ( rightBorder, x2 + 1 );
 				top = Math.max ( 0, y2 - 1 );
@@ -194,7 +193,6 @@ package redhood.surface
 				}
 				drawCircle ( x2, y2, 4, 0x555500 );
 			}
-			
 		}
 		
 		private function processCell ( i:int, x:int, y:int ):void
