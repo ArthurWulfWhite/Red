@@ -4,6 +4,7 @@ package
 	import flash.display.BitmapData;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.display.PixelSnapping;
 	/**
 	 * ...
 	 * @author Arthur Wulf
@@ -39,6 +40,10 @@ package
 					this.bitmapData = bmp;
 				}
 			}
+			
+			this.smoothing = true;
+			this.pixelSnapping = PixelSnapping.NEVER;
+			this.scaleX = this.scaleY = .99;
 		}
 		public function set posX(newX : Number):void
 		{

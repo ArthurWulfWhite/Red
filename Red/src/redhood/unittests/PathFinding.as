@@ -6,7 +6,7 @@ package redhood.unittests
 	
 	import redhood.surface.WalkableSurface;
 	
-	public class FindNearestPoint extends Sprite 
+	public class PathFinding extends Sprite 
 	{	
 		private const TESTED_LEVEL:int = 0;
 		//*
@@ -17,10 +17,12 @@ package redhood.unittests
 		
 		private var prevMouseX:int = -1;
 		private var prevMouseY:int = -1;
+		private var prevDestX:int = -1;
+		private var prevDestY:int = -1;
 		
 		private var debugPoint:Sprite = new Sprite ();
 		
-		public function FindNearestPoint() 
+		public function PathFinding() 
 		{
 			XMLLoader.init ();
 			init ();
@@ -50,9 +52,17 @@ package redhood.unittests
 			if ( mouseX == prevMouseX && mouseY == prevMouseY ) return;
 			prevMouseX = mouseX;
 			prevMouseY = mouseY;
-			var positions:Vector.<int> = walkableSurface.terrainSnapper.getClosestPoint ( mouseX, mouseY );
-			debugPoint.x = positions[0];
-			debugPoint.y = positions[1];
+			
+			walkableSurface.terrainSnapper.getClosestPoint ( mouseX, mouseY );
+			if ( walkableSurface.terrainSnapper.distance < 1000 ) {
+				debugPoint.x = walkableSurface.terrainSnapper.x;
+				debugPoint.y = walkableSurface.terrainSnapper.y;
+				if ( prevDestX != debugPoint.x || prevDestY != debugPoint.y ) {
+					walkableSurface.pathFinder.makePath ( 121, 232, debugPoint.x, debugPoint.y );
+					prevDestX = debugPoint.x;
+					prevDestY = debugPoint.y;
+				}
+			}
 		}
 		
 	}

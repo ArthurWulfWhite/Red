@@ -35,14 +35,15 @@ package redhood.surface
 		/**
 		 * Find the shortest path from source to destination
 		 */
-		public function makePath ( sourceX:int, sourceY:int, destinationX:int, destinationY:int ):int
+		public function makePath ( sourceX:Number, sourceY:Number, destinationX:int, destinationY:int ):Path
 		{ return _makePath ( sourceX, sourceY, destinationX, destinationY ) }
 		
 		/***********************************************
 		 *   IMPLEMENTATION
 		 ***********************************************/
 		
-		private const LOW_RES:int = 64;
+		private var highResBdata:BitmapData;
+		private const LOW_RES:int = 128;
 		private const FROM_LOW_RES:Number = LOW_RES / 512;
 		private const TO_LOW_RES:Number = 512 / LOW_RES;
 		
@@ -59,10 +60,10 @@ package redhood.surface
 		
 		private function _init ( terrain:DisplayObject ):void
 		{
-			var bdata:BitmapData = new BitmapData ( terrain.stage.stageWidth, terrain.stage.stageHeight, false, 0 );
-			bdata.draw ( terrain, null, strengthenColor );
+			highResBdata = new BitmapData ( terrain.stage.stageWidth, terrain.stage.stageHeight, false, 0 );
+			highResBdata.draw ( terrain, null, strengthenColor );
 			
-			createGrids ( bdata );
+			createGrids ( highResBdata );
 		}
 		
 		private function _drawDebug ():void
@@ -89,21 +90,24 @@ package redhood.surface
 		private var numPoints:int;
 		private var maxTime:Number;
 		
+		private var targetX:int;
+		private var targetY:int;
+		
 		private function drawCircle ( x:int, y:int, r:Number, c:int ):void
 		{
 			if ( !debugLayer ) return;
+			debugLayer.graphics.lineStyle ( );
 			debugLayer.graphics.beginFill ( c );
 			debugLayer.graphics.drawCircle ( frLow(x), frLow(y), r );
 			debugLayer.graphics.endFill ();
 		}
 		
-		private function _makePath ( x:int, y:int, x2:int, y2:int ):int
+		private function _makePath ( x:Number, y:Number, x2:int, y2:int ):Path
 		{
-			/*
-			makePath2 ( x, y, x2, y2 );
+			//*
+			return makePath2 ( x2, y2, x, y );
 			//makePath2 ( 121, 232, 309, 67 );
-			trace ( numPoints );
-			return 0;
+			
 			
 			/*/
 			var t:int = getTimer ();
@@ -112,17 +116,21 @@ package redhood.surface
 				makePath2 ( x2, y2, x, y );
 			}
 			//trace ( numPoints);
-			return getTimer () - t;
+			//return getTimer () - t;
 			//*/
 		}
 		
-		private function makePath2 ( x:int, y:int, x2:int, y2:int ):void
+		private var startX:int;
+		private var startY:int;
+		
+		private function makePath2 ( x:Number, y:Number, x2:Number, y2:Number ):Path
 		{
+			var path:Array = [ {x:x2, y:y2} ];
+			targetX = x;
+			targetY = y;
+			
 			var i:int;
-			if ( debugLayer ) {
-				debugLayer.graphics.clear ();
-				drawCircle ( toLow(x2), toLow(y2), 5, 0xFFFF00 );
-			}
+			if ( debugLayer ) debugLayer.graphics.clear ();
 			//index = { };
 			
 			for ( i = 0; i < LOW_RES; i ++ ) {
@@ -139,43 +147,38 @@ package redhood.surface
 			addIndex ( x, y, 0 );
 			numPoints = 1;
 			
+			
+			
 			destX = toLow ( x2 );
 			maxTime = Number.MAX_VALUE;
-			destY = toLow ( y2 );
+			destY = toLow ( y2 );			
 			
 			var rightBorder:int = lowRes.width - 1;
 			var botBorder:int = lowRes.height - 1;
 			
-			//do {
-				//var changed:Boolean = false;
-				for ( i = 0; i < numPoints; i++ ) {
-					if ( pointsDone[i] ) continue;
-					pointsDone[i] = true;
-					if ( minTime(destX, destY, pointsX[i], pointsY[i]) + pointsT[i] > maxTime ) continue;
-					
-					//changed = true;
-					var left:int = Math.max ( 0, pointsX[i] - 1 );
-					var right:int = Math.min ( rightBorder, pointsX[i] + 1 );
-					var top:int = Math.max ( 0, pointsY[i] - 1 );
-					var bot:int = Math.min ( botBorder, pointsY[i] + 1 );
-					for ( x = left; x <= right; x++ ) {
-						for ( y = top; y <= bot; y++ ) {
-							if ( x != pointsX[i] || y != pointsY[i] ) processCell ( i, x, y );
-						}
-					}	
-					var t:int = getTimer ();
-					//if ( t > end ) break;
-				}
-				//if ( t > end ) break;
-			//} while ( changed );
+			for ( i = 0; i < numPoints; i++ ) {
+				if ( pointsDone[i] ) continue;
+				pointsDone[i] = true;
+				if ( minTime(destX, destY, pointsX[i], pointsY[i]) + pointsT[i] > maxTime ) continue;
+				
+				var left:int = Math.max ( 0, pointsX[i] - 1 );
+				var right:int = Math.min ( rightBorder, pointsX[i] + 1 );
+				var top:int = Math.max ( 0, pointsY[i] - 1 );
+				var bot:int = Math.min ( botBorder, pointsY[i] + 1 );
+				for ( x = left; x <= right; x++ ) {
+					for ( y = top; y <= bot; y++ ) {
+						if ( x != pointsX[i] || y != pointsY[i] ) processCell ( i, x, y );
+					}
+				}	
+			}
 			
 			
-			//go back
+			//create path
 			x2 = destX;
 			y2 = destY;
-			var end:int = getTimer() + 1000;
 			var prevTime:Number = 0;
 			var time:Number = Number.MAX_VALUE;
+			
 			while ( prevTime != time ) {
 				prevTime = time;
 				left = Math.max ( 0, x2 - 1 );
@@ -192,9 +195,83 @@ package redhood.surface
 						}
 					}
 				}
-				drawCircle ( x2, y2, 4, 0x555500 );
+				if ( x2 != toLow ( targetX ) || y2 != toLow ( targetY ) ) path.push ( { x:frLow(x2), y:frLow(y2) } );
 			}
 			
+			path.push ( { x:targetX, y:targetY} );
+			//smooth path 
+			
+			for ( i = 0; i < path.length; i++ ) {
+				while ( i + 4 < path.length) {
+					if ( !sees(path[i].x, path[i].y, path[i+4].x, path[i+4].y) ) break;
+					path.splice ( i + 1, 3 );
+				}
+			}
+			
+			//repeat
+			for ( i = 0; i < path.length; i++ ) {
+				while ( i + 2 < path.length) {
+					if ( !sees(path[i].x, path[i].y, path[i+2].x, path[i+2].y) ) break;
+					path.splice ( i + 1, 1 );
+				}
+			}
+			
+			var _path2:Path = new Path ( path );
+			
+			//*
+			var _path:Path = new Path ( path );
+			
+			for ( i = 0; i < _path.totalDistance; i += 3 ) {
+				_path.travel ( 3 );
+				debugLayer.graphics.beginFill ( 0xFF );
+				debugLayer.graphics.drawCircle ( _path.x, _path.y, 1 );
+				debugLayer.graphics.endFill ();
+			}
+			//*/
+			
+			return _path2;
+		}
+		
+		private function sees ( x1:int, y1:int, x2:int, y2:int ):Boolean
+		{
+			/*
+			x1 = frLow ( x1 );
+			y1 = frLow ( y1 );
+			x2 = frLow ( x2 );
+			y2 = frLow ( y2 );
+			*/
+			
+			var dx:int = x2 - x1;
+			var dy:int = y2 - y1;
+			
+			var absDx:int = Math.abs ( dx );
+			var absDy:int = Math.abs ( dy );
+			
+			if ( absDx > absDy ) var numSteps:int = absDx;
+			else numSteps = absDy;
+			
+			var stepX:Number = dx / numSteps;
+			var stepY:Number = dy / numSteps;
+			
+			var x:Number = x1;
+			var y:Number = y1;
+			var seeable:Boolean = true;
+			for ( var i:int = 0; i < numSteps; i++ ) {
+				x += stepX;
+				y += stepY;
+				if ( highResBdata.getPixel(Math.floor(x), Math.floor(y)) == 0 ) {
+					seeable = false;
+					break;
+				}
+				/*
+				debugLayer.graphics.lineStyle ( );
+				debugLayer.graphics.beginFill ( 0xFFFFFF );
+				debugLayer.graphics.drawCircle ( Math.floor(x), Math.floor(y), 1 );
+				debugLayer.graphics.endFill ();
+				*/
+			}
+			
+			return seeable;
 		}
 		
 		private function processCell ( i:int, x:int, y:int ):void
@@ -249,7 +326,7 @@ package redhood.surface
 			return straight + diagonal * Math.SQRT2;
 		}
 		
-		private function toLow ( v:int ):int
+		private function toLow ( v:Number ):int
 		{
 			return Math.floor ( v * FROM_LOW_RES );
 		}
@@ -262,6 +339,7 @@ package redhood.surface
 		private function createGrids ( bdata:BitmapData ):void
 		{
 			var bmp:Bitmap = new Bitmap ( bdata );
+			
 			
 			lowRes = new BitmapData ( LOW_RES, LOW_RES, false, 0 );
 			var scaledown:Number = LOW_RES / bdata.width;

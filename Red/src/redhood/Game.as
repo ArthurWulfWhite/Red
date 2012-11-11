@@ -3,6 +3,7 @@ package redhood
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	import redhood.surface.Path;
 	
 	import redhood.surface.WalkableSurface;
 	
@@ -34,6 +35,11 @@ package redhood
 		private var prevMouseY:int = -1;
 		private var prevDestX:int = -1;
 		private var prevDestY:int = -1;
+		
+		private var path:Path;
+		
+		private var redAccurateX:Number;
+		private var redAccurateY:Number;
 		
 		public function Game() 
 		{
@@ -67,7 +73,8 @@ package redhood
 			
 			stage.addEventListener ( KeyboardEvent.KEY_DOWN, onKeyDown );
 			stage.addEventListener ( Event.ENTER_FRAME, onEnterFrame );
-			red.alpha = .4;
+			//red.alpha = .4;
+			
 		}
 		
 		public function loadLevel ( lvlNum:int ):void
@@ -76,6 +83,8 @@ package redhood
 			setCharacters ();
 			walkableSurface.draw ( lvlNum );
 			spawnForest ();
+			redAccurateX = red.x;
+			redAccurateY = red.y;
 		}
 		
 		private function onKeyDown ( e:KeyboardEvent ):void
@@ -85,21 +94,32 @@ package redhood
 		
 		private function onEnterFrame ( e:Event ):void
 		{
-			if ( mouseX == prevMouseX && mouseY == prevMouseY ) return;
-			prevMouseX = mouseX;
-			prevMouseY = mouseY;
+			if ( mouseX != prevMouseX || mouseY != prevMouseY ) {
+				prevMouseX = mouseX;
+				prevMouseY = mouseY;
 			
-			walkableSurface.terrainSnapper.getClosestPoint ( mouseX, mouseY );
-			if ( walkableSurface.terrainSnapper.distance < 1000 ) {
-				debugPoint.x = walkableSurface.terrainSnapper.x;
-				debugPoint.y = walkableSurface.terrainSnapper.y;
-				if ( prevDestX != debugPoint.x || prevDestY != debugPoint.y ) {
-					walkableSurface.debug ( walkableSurface.pathFinder.makePath ( red.x, red.y, debugPoint.x, debugPoint.y ) );
-					prevDestX = debugPoint.x;
-					prevDestY = debugPoint.y;
+				walkableSurface.terrainSnapper.getClosestPoint ( mouseX, mouseY );
+				if ( walkableSurface.terrainSnapper.distance < 1000 ) {
+					debugPoint.x = walkableSurface.terrainSnapper.x;
+					debugPoint.y = walkableSurface.terrainSnapper.y;
+					if ( prevDestX != debugPoint.x || prevDestY != debugPoint.y ) {
+						//walkableSurface.debug ( walkableSurface.pathFinder.makePath ( red.x, red.y, debugPoint.x, debugPoint.y ) );
+						path = walkableSurface.pathFinder.makePath ( redAccurateX, redAccurateY, debugPoint.x, debugPoint.y );
+						prevDestX = debugPoint.x;
+						prevDestY = debugPoint.y;
+					}
 				}
 			}
-			
+			if ( path ) {
+				var distanceToTarget:Number = path.totalDistance - path.distanceTravelled;
+				if ( distanceToTarget > 100 ) distanceToTarget = 100;
+				distanceToTarget = 100.1 - distanceToTarget;
+				var speed:Number = Math.pow ( distanceToTarget, 1 / 10 );
+				trace ( distanceToTarget, speed );
+				path.travel ( speed );
+				red.x = redAccurateX = path.x;
+				red.y = redAccurateY = path.y;
+			}
 			//trace ( debugPoint.x, debugPoint.y );
 			/*
 			//I always move red//

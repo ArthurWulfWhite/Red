@@ -65,7 +65,7 @@ package redhood.surface
 			graphics.clear();
 			graphics.lineStyle(24, 0x8800);
 			graphics.lineBitmapStyle(grass);
-			/*
+			//*
 			drawAreas ( lvlNum );
 			drawPaths ( lvlNum );
 			/*/

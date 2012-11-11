@@ -67,7 +67,7 @@ package redhood
 			game = new Game ();
 			addChild ( game );
 			game.init ();
-			game.loadLevel ( 0 );
+			game.loadLevel ( 4 );
 			
 			/*
 			surface.cacheAsBitmap = true;
